@@ -1,0 +1,17 @@
+{
+  "name": "mykonos-dm-bot",
+  "version": "2.2.2",
+  "private": true,
+  "description": "Mykonos Shop 2k26 Discord bot with games dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^16.4.7"
+  }
+}
