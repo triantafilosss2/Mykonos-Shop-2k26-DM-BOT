@@ -13,7 +13,7 @@ const client = new Client({
 
 const PREFIX = "!";
 const COMMAND = "dmall";
-const COOLDOWN = 60 * 60 * 1000; // 1 hour
+const COOLDOWN = 60 * 60 * 1000;
 
 let lastUsed = 0;
 
@@ -25,24 +25,35 @@ client.once("ready", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.guild) return;
 
-  const prefix = `${PREFIX}${COMMAND}`;
+  const command = `${PREFIX}${COMMAND}`;
 
-  if (!message.content.toLowerCase().startsWith(prefix.toLowerCase())) return;
-
-  const announcement = message.content.slice(prefix.length).trim();
-
-  if (message.author.id !== message.guild.ownerId) {
-    return message.reply("Μόνο ο Owner του server μπορεί να χρησιμοποιήσει αυτή την εντολή.");
+  if (!message.content.toLowerCase().startsWith(command.toLowerCase())) {
+    return;
   }
 
+  // Only the server owner can use !dmall
+  if (message.author.id !== message.guild.ownerId) {
+    return message.reply(
+      "Μόνο ο Owner του server μπορεί να χρησιμοποιήσει αυτή την εντολή."
+    );
+  }
+
+  const announcement = message.content.slice(command.length).trim();
+
+  // Do NOT start cooldown if there is no message
   if (!announcement) {
-    return message.reply("Γράψε και το μήνυμα μετά το !dmall.");
+    return message.reply(
+      "Γράψε το μήνυμα που θέλεις μετά το !dmall.\nΠαράδειγμα: `!dmall Καλησπέρα παιδιά!`"
+    );
   }
 
   const now = Date.now();
 
   if (now - lastUsed < COOLDOWN) {
-    const remaining = Math.ceil((COOLDOWN - (now - lastUsed)) / 60000);
+    const remaining = Math.ceil(
+      (COOLDOWN - (now - lastUsed)) / 60000
+    );
+
     return message.reply(
       `Το !dmall είναι σε cooldown. Δοκίμασε ξανά σε περίπου ${remaining} λεπτά.`
     );
@@ -50,7 +61,9 @@ client.on("messageCreate", async (message) => {
 
   lastUsed = now;
 
-  await message.reply("Ξεκινάω την αποστολή του announcement.");
+  await message.reply(
+    "📨 Ξεκινάω την αποστολή του announcement."
+  );
 
   try {
     await message.guild.members.fetch();
@@ -67,7 +80,6 @@ client.on("messageCreate", async (message) => {
         await member.send(announcement);
         sent++;
 
-        // Delay between messages.
         await new Promise((resolve) => setTimeout(resolve, 1500));
       } catch {
         failed++;
@@ -75,11 +87,15 @@ client.on("messageCreate", async (message) => {
     }
 
     await message.channel.send(
-      `Ολοκληρώθηκε.\nΕπιτυχείς αποστολές: ${sent}\nΑποτυχημένες/κλειστά DMs: ${failed}`
+      `✅ Ολοκληρώθηκε.\n` +
+      `📨 Επιτυχείς αποστολές: ${sent}\n` +
+      `⚠️ Αποτυχημένες/κλειστά DMs: ${failed}`
     );
   } catch (error) {
     console.error(error);
-    await message.channel.send("Παρουσιάστηκε σφάλμα.");
+    await message.channel.send(
+      "❌ Παρουσιάστηκε σφάλμα."
+    );
   }
 });
 
